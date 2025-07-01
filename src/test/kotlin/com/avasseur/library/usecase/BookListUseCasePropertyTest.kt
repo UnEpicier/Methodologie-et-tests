@@ -3,6 +3,7 @@ package com.avasseur.library.usecase
 import com.avasseur.library.model.Book
 import com.avasseur.library.port.BookRepository
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.stringPattern
@@ -31,10 +32,10 @@ class BookListUseCasePropertyTest : StringSpec({
         val titles = mutableListOf<String>()
 
         checkAll(Arb.stringPattern("[A-Za-z]+")) { title ->
-            bookRepository.addBook(Book("Author", title))
             titles.add(title)
+            bookRepository.addBook(Book(title, "Self"))
         }
 
-        bookListUseCase.getBooks().map { it.name } shouldBe  titles.sorted()
+        bookListUseCase.getBooks().map { it.name } shouldContainExactly titles.sorted()
     }
 })
