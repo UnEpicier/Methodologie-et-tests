@@ -1,13 +1,15 @@
 import info.solidsoft.gradle.pitest.PitestPluginExtension
+import io.gitlab.arturbosch.detekt.Detekt
 
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
+	kotlin("jvm") version "2.0.21"
+	kotlin("plugin.spring") version "2.0.21"
 	id("org.springframework.boot") version "3.5.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("jacoco")
 	id("java")
 	id("info.solidsoft.pitest") version "1.19.0-rc.1"
+	id("io.gitlab.arturbosch.detekt") version ("1.23.8")
 }
 
 group = "com.avasseur"
@@ -38,10 +40,34 @@ testing {
 				runtimeClasspath += sourceSets.main.get().output
 			}
 		}
+		val testComponent by registering(JvmTestSuite::class) {
+			sources {
+				kotlin {
+					setSrcDirs(listOf("src/testComponent/kotlin"))
+				}
+				compileClasspath += sourceSets.main.get().output
+				runtimeClasspath += sourceSets.main.get().output
+			}
+		}
+		val testArchitecture by registering(JvmTestSuite::class) {
+			sources {
+				kotlin {
+					setSrcDirs(listOf("src/testArchitecture/kotlin"))
+				}
+				compileClasspath += sourceSets.main.get().output
+				runtimeClasspath += sourceSets.main.get().output
+			}
+		}
 	}
 }
 
 val testIntegrationImplementation: Configuration by configurations.getting {
+	extendsFrom(configurations.implementation.get())
+}
+val testComponentImplementation: Configuration by configurations.getting {
+	extendsFrom(configurations.implementation.get())
+}
+val testArchitectureImplementation: Configuration by configurations.getting {
 	extendsFrom(configurations.implementation.get())
 }
 
@@ -76,6 +102,23 @@ dependencies {
 	testIntegrationImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
 	testIntegrationImplementation("io.kotest.extensions:kotest-extensions-testcontainers:2.0.2")
 	testIntegrationImplementation("io.kotest.extensions:kotest-extensions-pitest:1.2.0")
+
+	testComponentImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+	testComponentImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude(module = "mockito-core")
+	}
+	testComponentImplementation("io.cucumber:cucumber-java:7.14.0")
+	testComponentImplementation("io.cucumber:cucumber-spring:7.14.0")
+	testComponentImplementation("io.cucumber:cucumber-junit:7.14.0")
+	testComponentImplementation("io.cucumber:cucumber-junit-platform-engine:7.14.0")
+	testComponentImplementation("io.rest-assured:rest-assured:5.3.2")
+	testComponentImplementation("org.junit.platform:junit-platform-suite:1.10.0")
+	testComponentImplementation("org.testcontainers:postgresql:1.19.1")
+	testComponentImplementation("io.kotest:kotest-assertions-core:5.9.1")
+
+	testArchitectureImplementation("com.tngtech.archunit:archunit-junit5:1.2.0")
+	testArchitectureImplementation("io.kotest:kotest-assertions-core:5.9.1")
+	testArchitectureImplementation("io.kotest:kotest-runner-junit5:5.9.1")
 }
 
 kotlin {
@@ -115,3 +158,22 @@ pitest {
 	excludedClasses.add("**BookmanagerApplication")
 }
 
+detekt {
+	toolVersion = "1.23.8"
+	config.setFrom("$projectDir/config/detekt.yml")
+	buildUponDefaultConfig = true
+	allRules = false
+	ignoreFailures = true
+	basePath = rootProject.projectDir.absolutePath
+}
+
+tasks.withType<Detekt>().configureEach {
+	basePath = rootProject.projectDir.absolutePath
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+		txt.required.set(true)
+		sarif.required.set(true)
+		md.required.set(true)
+	}
+}
