@@ -1,4 +1,4 @@
-package com.avasseur.library.model
+package com.avasseur.domain.model
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec

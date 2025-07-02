@@ -1,6 +1,6 @@
-package com.avasseur.library.usecase
-import com.avasseur.library.model.Book
-import com.avasseur.library.port.BookRepository
+package com.avasseur.domain.usecase
+import com.avasseur.domain.model.Book
+import com.avasseur.domain.port.BookRepository
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
@@ -8,7 +8,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 
-class LibraryUseCaseTest: StringSpec ({
+class BookListUseCaseTest: StringSpec ({
     val bookRepository = mockk<BookRepository>()
     val bookListUseCase = BookListUseCase(bookRepository)
 
@@ -19,7 +19,7 @@ class LibraryUseCaseTest: StringSpec ({
             Book("Author3", "Book3"),
             Book("Author2", "Book2")
         )
-        every { bookRepository.getAll() } returns books
+        every { bookRepository.getBooks() } returns books
 
         // Act
         val result = bookListUseCase.getBooks()

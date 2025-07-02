@@ -1,10 +1,9 @@
-package com.avasseur.library.usecase
+package com.avasseur.domain.usecase
 
-import com.avasseur.library.model.Book
-import com.avasseur.library.port.BookRepository
+import com.avasseur.domain.model.Book
+import com.avasseur.domain.port.BookRepository
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.stringPattern
 import io.kotest.property.checkAll
@@ -12,7 +11,7 @@ import io.kotest.property.checkAll
 class InMemoryBookRepository : BookRepository {
     private val books = mutableListOf<Book>()
 
-    override fun getAll(): List<Book> = books
+    override fun getBooks(): List<Book> = books
 
     override fun addBook(book: Book) {
         books.add(book)
@@ -36,6 +35,6 @@ class BookListUseCasePropertyTest : StringSpec({
             bookRepository.addBook(Book(title, "Self"))
         }
 
-        bookListUseCase.getBooks().map { it.name } shouldContainExactly titles.sorted()
+        bookListUseCase.getBooks().map { it.title } shouldContainExactly titles.sorted()
     }
 })
