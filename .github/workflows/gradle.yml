@@ -91,4 +91,4 @@ jobs:
         with:
           check_name: Architecture tests results
           files: |
-            build/test-results/testArchitectureÆ/*.xml
+            build/test-results/testArchitecture/*.xml
