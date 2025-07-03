@@ -37,11 +37,11 @@ class BookDAOITest(
             performQuery(
                 // language=sql
                 """
-               insert into book (title, author)
+               insert into book (title, author, booked)
                values 
-                   ('Hamlet', 'Shakespeare'),
-                   ('Les fleurs du mal', 'Beaudelaire'),
-                   ('Harry Potter', 'Rowling');
+                   ('Hamlet', 'Shakespeare', false),
+                   ('Les fleurs du mal', 'Beaudelaire', false),
+                   ('Harry Potter', 'Rowling', false);
             """.trimIndent()
             )
 
@@ -50,13 +50,13 @@ class BookDAOITest(
 
             // THEN
             res.shouldContainExactlyInAnyOrder(
-                Book("Hamlet", "Shakespeare"), Book("Les fleurs du mal", "Beaudelaire"), Book("Harry Potter", "Rowling")
+                Book("Hamlet", "Shakespeare", false), Book("Les fleurs du mal", "Beaudelaire", false), Book("Harry Potter", "Rowling", false)
             )
         }
 
         "create book in db" {
             // GIVEN
-            val book = Book("Les misérables", "Victor Hugo")
+            val book = Book("Les misérables", "Victor Hugo", false)
 
             // WHEN
             bookDAO.addBook(book)
@@ -72,6 +72,7 @@ class BookDAOITest(
                 this["id"].shouldNotBeNull().shouldBeInstanceOf<Int>()
                 this["title"].shouldBe("Les misérables")
                 this["author"].shouldBe("Victor Hugo")
+                this["booked"].shouldBe(false)
             }
         }
 

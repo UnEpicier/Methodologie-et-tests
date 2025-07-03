@@ -1,6 +1,6 @@
 package com.avasseur.domain.model
 
-data class Book(val title: String, val author: String) {
+data class Book(val title: String, val author: String, val booked: Boolean) {
     init {
         require(title.isNotBlank()) { "Name must not be blank" }
         require(author.isNotBlank()) { "Author must not be blank" }

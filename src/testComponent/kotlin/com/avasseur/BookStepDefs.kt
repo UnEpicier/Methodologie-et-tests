@@ -1,6 +1,7 @@
 package com.avasseur
 
 import io.cucumber.java.Before
+import io.cucumber.java.ParameterType
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -16,14 +17,17 @@ class BookStepDefs {
     @LocalServerPort
     private var port: Int? = 0
 
+    @ParameterType("false|true")
+    fun ghekinBoolean(value: String) = value.toBoolean()
+
     @Before
     fun setup(scenario: Scenario) {
         RestAssured.baseURI = "http://localhost:$port"
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails()
     }
 
-    @When("the user creates the book {string} written by {string}")
-    fun createBook(title: String, author: String) {
+    @When("the user creates the book {string} written by {string} and its reservation state is {ghekinBoolean}")
+    fun createBook(title: String, author: String, booked: Boolean) {
         given()
             .contentType(ContentType.JSON)
             .and()
@@ -31,7 +35,8 @@ class BookStepDefs {
                 """
                     {
                       "title": "$title",
-                      "author": "$author"
+                      "author": "$author",
+                      "booked": $booked
                     }
                 """.trimIndent()
             )
@@ -51,19 +56,24 @@ class BookStepDefs {
     }
 
     @Then("the list should contains the following books in the same order")
-    fun shouldHaveListOfBooks(payload: List<Map<String, String>>) {
+    fun shouldHaveListOfBooks(payload: List<Map<String, Any>>) {
         val expectedResponse = payload.joinToString(separator = ",", prefix = "[", postfix = "]") { line ->
             """
                 ${
                 line.entries.joinToString(separator = ",", prefix = "{", postfix = "}") {
-                    """"${it.key}": "${it.value}""""
+                    val formattedValue = if (it.key == "booked") {
+                        (it.value as String).toBoolean().toString()
+                    } else {
+                        """"${it.value}""""
+                    }
+
+                    """"${it.key}": $formattedValue"""
                 }
             }
             """.trimIndent()
 
         }
         lastBookResult.extract().body().jsonPath().prettify() shouldBe JsonPath(expectedResponse).prettify()
-
     }
 
     companion object {

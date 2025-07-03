@@ -15,9 +15,9 @@ class BookListUseCaseTest: StringSpec ({
     "getAll returns sorted list of books" {
         // Arrange
         val books = listOf(
-            Book("Author1", "Book1"),
-            Book("Author3", "Book3"),
-            Book("Author2", "Book2")
+            Book("Author1", "Book1", false),
+            Book("Author3", "Book3", false),
+            Book("Author2", "Book2", false)
         )
         every { bookRepository.getBooks() } returns books
 
@@ -26,15 +26,15 @@ class BookListUseCaseTest: StringSpec ({
 
         // Assert
         result shouldContainExactly listOf(
-            Book("Author1", "Book1"),
-            Book("Author2", "Book2"),
-            Book("Author3", "Book3")
+            Book("Author1", "Book1", false),
+            Book("Author2", "Book2", false),
+            Book("Author3", "Book3", false)
         )
     }
 
     "add method adds a book to the repository" {
         // Arrange
-        val book = Book("NewAuthor", "NewTitle")
+        val book = Book("NewAuthor", "NewTitle", false)
         justRun { bookRepository.addBook(any()) }
 
         // Act
