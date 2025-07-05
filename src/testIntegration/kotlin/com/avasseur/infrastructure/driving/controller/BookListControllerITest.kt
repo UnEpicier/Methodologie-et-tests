@@ -23,7 +23,7 @@ class BookListControllerITest(
 
     "rest route get books" {
         // GIVEN
-        every { bookListUseCase.getBooks() } returns listOf(Book("A", "B", false))
+        every { bookListUseCase.getBooks() } returns listOf(Book("A", "B"))
 
         // WHEN
         mockMvc.get("/books")
@@ -66,8 +66,7 @@ class BookListControllerITest(
 
         val expected = Book(
             title = "Les misérables",
-            author = "Victor Hugo",
-            false
+            author = "Victor Hugo"
         )
 
         verify(exactly = 1) { bookListUseCase.addBook(expected) }

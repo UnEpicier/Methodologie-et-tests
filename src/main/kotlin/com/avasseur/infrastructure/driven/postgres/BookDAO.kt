@@ -7,11 +7,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 
 @Repository
-class BookDAO(private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate): BookRepository {
+class BookDAO(private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate) : BookRepository {
     override fun getBooks(): List<Book> {
         return namedParameterJdbcTemplate
-            .query("SELECT * FROM BOOK", MapSqlParameterSource()) { rs, _ ->
+            .query("SELECT * FROM book", MapSqlParameterSource()) { rs, _ ->
                 Book(
+                    id = rs.getInt("id"),
                     title = rs.getString("title"),
                     author = rs.getString("author"),
                     booked = rs.getBoolean("booked")
@@ -21,10 +22,12 @@ class BookDAO(private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     override fun addBook(book: Book) {
         namedParameterJdbcTemplate
-            .update("INSERT INTO BOOK (title, author, booked) values (:title, :author, :booked)", mapOf(
-                "title" to book.title,
-                "author" to book.author,
-                "booked" to book.booked
-            ))
+            .update(
+                "INSERT INTO book (title, author, booked) values (:title, :author, :booked)", mapOf(
+                    "title" to book.title,
+                    "author" to book.author,
+                    "booked" to book.booked
+                )
+            )
     }
 }

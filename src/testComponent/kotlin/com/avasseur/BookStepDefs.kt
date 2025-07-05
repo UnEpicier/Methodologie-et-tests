@@ -1,7 +1,6 @@
 package com.avasseur
 
 import io.cucumber.java.Before
-import io.cucumber.java.ParameterType
 import io.cucumber.java.Scenario
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -17,17 +16,14 @@ class BookStepDefs {
     @LocalServerPort
     private var port: Int? = 0
 
-    @ParameterType("false|true")
-    fun ghekinBoolean(value: String) = value.toBoolean()
-
     @Before
     fun setup(scenario: Scenario) {
         RestAssured.baseURI = "http://localhost:$port"
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails()
     }
 
-    @When("the user creates the book {string} written by {string} and its reservation state is {ghekinBoolean}")
-    fun createBook(title: String, author: String, booked: Boolean) {
+    @When("the user creates the book {string} written by {string}")
+    fun createBook(title: String, author: String) {
         given()
             .contentType(ContentType.JSON)
             .and()
@@ -35,8 +31,7 @@ class BookStepDefs {
                 """
                     {
                       "title": "$title",
-                      "author": "$author",
-                      "booked": $booked
+                      "author": "$author"
                     }
                 """.trimIndent()
             )
@@ -63,6 +58,8 @@ class BookStepDefs {
                 line.entries.joinToString(separator = ",", prefix = "{", postfix = "}") {
                     val formattedValue = if (it.key == "booked") {
                         (it.value as String).toBoolean().toString()
+                    } else if (it.key == "id") {
+                        (it.value as String).toIntOrNull().toString()
                     } else {
                         """"${it.value}""""
                     }

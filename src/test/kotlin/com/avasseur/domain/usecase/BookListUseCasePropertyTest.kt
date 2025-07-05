@@ -32,7 +32,7 @@ class BookListUseCasePropertyTest : StringSpec({
 
         checkAll(Arb.stringPattern("[A-Za-z]+")) { title ->
             titles.add(title)
-            bookRepository.addBook(Book(title, "Self", false))
+            bookRepository.addBook(Book(title, "Self"))
         }
 
         bookListUseCase.getBooks().map { it.title } shouldContainExactly titles.sorted()
