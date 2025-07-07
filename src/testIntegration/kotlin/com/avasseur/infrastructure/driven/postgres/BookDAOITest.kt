@@ -9,6 +9,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -28,7 +29,7 @@ class BookDAOITest(
         beforeTest {
             performQuery(
                 // language=sql
-                "DELETE FROM book"
+                "TRUNCATE TABLE book RESTART IDENTITY CASCADE"
             )
         }
 
@@ -56,6 +57,43 @@ class BookDAOITest(
             )
         }
 
+        "get book by id from db" {
+            // GIVEN
+            performQuery(
+                // language=sql
+                """
+               insert into book (title, author, booked)
+               values 
+                   ('Hamlet', 'Shakespeare', false);
+            """.trimIndent()
+            )
+
+            // WHEN
+            val res = bookDAO.getBookById(1)
+
+            // THEN
+            res.shouldNotBeNull()
+            res shouldBe Book(1, "Hamlet", "Shakespeare")
+        }
+
+        "get book by id from db not found" {
+            // GIVEN
+            performQuery(
+                // language=sql
+                """
+               insert into book (title, author, booked)
+               values 
+                   ('Hamlet', 'Shakespeare', false);
+            """.trimIndent()
+            )
+
+            // WHEN
+            val res = bookDAO.getBookById(99)
+
+            // THEN
+            res.shouldBeNull()
+        }
+
         "create book in db" {
             // GIVEN
             val book = Book("Les misérables", "Victor Hugo")
@@ -75,6 +113,58 @@ class BookDAOITest(
                 this["title"].shouldBe("Les misérables")
                 this["author"].shouldBe("Victor Hugo")
                 this["booked"].shouldBe(false)
+            }
+        }
+
+        "update book in db" {
+            // GIVEN
+            performQuery(
+                // language=sql
+                """
+               insert into book (title, author, booked)
+               values 
+                   ('Hamlet', 'Shakespeare', false);
+            """.trimIndent()
+            )
+
+            // WHEN
+            val book = Book(1, "Hamlet", "Shakespeare")
+            bookDAO.setBookedStateOfBook(book, true)
+
+            // THEN
+            val res = performQuery(
+                // language=sql
+                "SELECT * from book"
+            )
+
+            res shouldHaveSize 1
+            assertSoftly(res.first()) {
+                this["id"].shouldNotBeNull().shouldBeInstanceOf<Int>()
+                this["title"].shouldBe("Hamlet")
+                this["author"].shouldBe("Shakespeare")
+                this["booked"].shouldBe(true)
+            }
+        }
+
+        "update book same state in db" {
+            // GIVEN
+            performQuery(
+                // language=sql
+                """
+               insert into book (title, author, booked)
+               values 
+                   ('Hamlet', 'Shakespeare', false);
+            """.trimIndent()
+            )
+
+            // WHEN
+            val book = Book(1, "Hamlet", "Shakespeare")
+
+            try {
+                bookDAO.setBookedStateOfBook(book, false)
+            } catch (e: Exception) {
+                // THEN
+                e.message.shouldBe("Book is already false")
             }
         }
 

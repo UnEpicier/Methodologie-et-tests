@@ -13,8 +13,22 @@ class InMemoryBookRepository : BookRepository {
 
     override fun getBooks(): List<Book> = books
 
+    override fun getBookById(id: Int): Book? = books.find { it.id == id }
+
     override fun addBook(book: Book) {
         books.add(book)
+    }
+
+    override fun setBookedStateOfBook(book: Book, booked: Boolean) {
+        val newBook = Book(
+            id = book.id,
+            title = book.title,
+            author = book.author,
+            booked = booked
+        )
+
+        books.remove(book)
+        books.add(newBook)
     }
 
     fun clear() {
